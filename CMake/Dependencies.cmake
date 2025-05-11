@@ -117,6 +117,7 @@ if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
             -DCMAKE_DISABLE_FIND_PACKAGE_HarfBuzz=TRUE
             -DCMAKE_DISABLE_FIND_PACKAGE_BZip2=TRUE
             -DCMAKE_DISABLE_FIND_PACKAGE_BrotliDec=TRUE
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             # workaround for broken iOS toolchain in freetype
             -DPROJECT_SOURCE_DIR=${PROJECT_BINARY_DIR}/freetype-2.13.2
             ${PROJECT_BINARY_DIR}/freetype-2.13.2
@@ -128,16 +129,16 @@ if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
     if(MSVC OR MINGW OR SKBUILD) # other platforms dont need this
         message(STATUS "Building SDL2")
         file(DOWNLOAD
-            https://libsdl.org/release/SDL2-2.30.11.tar.gz
-            ${PROJECT_BINARY_DIR}/SDL2-2.30.11.tar.gz)
+            https://libsdl.org/release/SDL2-2.32.4.tar.gz
+            ${PROJECT_BINARY_DIR}/SDL2-2.32.4.tar.gz)
         execute_process(COMMAND ${CMAKE_COMMAND} 
-            -E tar xf SDL2-2.30.11.tar.gz WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+            -E tar xf SDL2-2.32.4.tar.gz WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
         execute_process(COMMAND ${CMAKE_COMMAND}
             -E make_directory ${PROJECT_BINARY_DIR}/SDL2-build)
         execute_process(COMMAND ${BUILD_COMMAND_COMMON}
             -DSDL_STATIC=FALSE
             -DCMAKE_INSTALL_LIBDIR=lib
-            ${PROJECT_BINARY_DIR}/SDL2-2.30.11
+            ${PROJECT_BINARY_DIR}/SDL2-2.32.4
             WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/SDL2-build)
         execute_process(COMMAND ${CMAKE_COMMAND}
             --build ${PROJECT_BINARY_DIR}/SDL2-build ${BUILD_COMMAND_OPTS})
@@ -198,6 +199,7 @@ if(OGRE_BUILD_DEPENDENCIES AND NOT EXISTS ${OGREDEPS_PATH})
         -DBUILD_UNIT_TESTS=OFF
         -DCMAKE_RELWITHDEBINFO_POSTFIX= # fixes FindBullet on MSVC
         -DBUILD_CLSOCKET=OFF
+        -DCMAKE_POLICY_VERSION_MINIMUM=3.5
         ${PROJECT_BINARY_DIR}/bullet3-3.25
         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/bullet3-3.25)
     execute_process(COMMAND ${CMAKE_COMMAND}

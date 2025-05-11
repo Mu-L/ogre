@@ -324,6 +324,11 @@ namespace Ogre
 
     bool ScriptCompiler::compile(const ConcreteNodeListPtr &nodes, const String &group)
     {
+        if(nodes && !nodes->empty())
+        {
+            mSourceFile = nodes->front()->file;
+        }
+
         // Set up the compilation context
         mGroup = group;
 
@@ -353,7 +358,7 @@ namespace Ogre
         for(auto & i : *ast)
         {
 #if DEBUG_AST
-            logAST(0, *i);
+            logAST(0, i);
 #endif
             if(i->type == ANT_OBJECT && static_cast<ObjectAbstractNode*>(i.get())->abstract)
                 continue;
@@ -366,6 +371,7 @@ namespace Ogre
         mImports.clear();
         mImportRequests.clear();
         mImportTable.clear();
+        mSourceFile.clear();
 
         return mErrors.empty();
     }
@@ -383,6 +389,11 @@ namespace Ogre
         }
 
         mErrors.push_back({file, msg, line, code});
+    }
+
+    void ScriptCompiler::addError(const AbstractNode& node, const String& msg, uint32 code)
+    {
+        addError(code, mSourceFile, node.line, msg);
     }
 
     void ScriptCompiler::setListener(ScriptCompilerListener *listener)
@@ -1045,7 +1056,8 @@ namespace Ogre
         mIds["3d"] = ID_3D;
         mIds["cubic"] = ID_CUBIC;
         mIds["unlimited"] = ID_UNLIMITED;
-        mIds["2darray"] = ID_2DARRAY;
+        mIds["2darray"] = ID_2DARRAY; // deprecated and undocumented
+        mIds["2d_array"] = ID_2DARRAY;
         mIds["alpha"] = ID_ALPHA;
         mIds["gamma"] = ID_GAMMA;
         mIds["anim_texture"] = ID_ANIM_TEXTURE;
@@ -1468,6 +1480,12 @@ namespace Ogre
                 impl->id = iter2->second;
 
             asn = AbstractNodePtr(impl);
+
+            if(mCurrent && mCurrent->type != ANT_PROPERTY)
+            {
+                // stray atom outside of a property is likely a property without a value
+                mCompiler->addError(*impl, "missing property value");
+            }
         }
 
         // Here, we must insert the node into the tree
